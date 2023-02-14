@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Activators
@@ -14,27 +15,33 @@ namespace Activators
     
         [SerializeField] protected int id;
 
+        private List<IActivator> activators;
+
         private void Awake()
         {
+            activators = new List<IActivator>();
             GetComponent<BoxCollider2D>().isTrigger = true;
         }
 
         private void OnTriggerEnter2D(Collider2D col)
         {
-            var character = col.GetComponent<Character>();
+            var activator = col.GetComponent<IActivator>();
         
-            if(character is null) return;
-        
+            if(activator is null) return;
+
+            activators.Add(activator);
             Activate?.Invoke(id);
         }
 
         private void OnTriggerExit2D(Collider2D other)
         {
-            var character = other.GetComponent<Character>();
+            var activator = other.GetComponent<IActivator>();
         
-            if(character is null) return;
-        
-            Deactivate?.Invoke(id);
+            if(activator is null) return;
+
+            activators.Remove(activator);
+            if(activators.Count == 0)
+                Deactivate?.Invoke(id);
         }
     }
 }
