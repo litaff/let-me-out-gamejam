@@ -7,7 +7,7 @@ using UnityEngine;
 public class TeleporterPad : MonoBehaviour
 {
     [SerializeField] private TeleporterPad linkedPad;
-    [SerializeField] private int teleportOffset;
+    [SerializeField] private float teleportOffset;
     private List<Character> characters;
 
     private void Awake()
@@ -19,8 +19,10 @@ public class TeleporterPad : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D col)
     {
         var character = col.GetComponent<Character>();
-        
-        if(characters.Contains(character)) return;
+
+        if (character is null) return;
+
+        if (characters.Contains(character)) return;
         
         linkedPad.Teleport(character);
     }
