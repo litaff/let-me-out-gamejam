@@ -14,7 +14,7 @@ public class Player : Character, ISpawnAble, IActivator
 	private Vector2 input;
 
 	public static event Action<Vector2> OnDamage;
-	public static event Action<Vector2> OnDeath;
+	public static event Action OnDeath;
 
 	public void Spawn(Vector2 pos)
 	{
@@ -62,7 +62,7 @@ public class Player : Character, ISpawnAble, IActivator
 
 	private void Die()
 	{
-		OnDeath?.Invoke(transform.position);
+		OnDeath?.Invoke();
 	}
 
 	private bool Stunned()
