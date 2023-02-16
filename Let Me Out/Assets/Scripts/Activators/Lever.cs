@@ -13,8 +13,9 @@ namespace Activators
         public static event Action<int> Deactivate;
 
         public bool Active { get; private set; }
-    
-        [SerializeField] protected int id;
+
+        [SerializeField] private bool singleUse = false;
+        [SerializeField] private int id;
 
         private void Awake()
         {
@@ -28,6 +29,8 @@ namespace Activators
         
             if(character is null) return;
 
+            if (Active && singleUse) return;
+            
             if (Active)
             {
                 Deactivate?.Invoke(id);
