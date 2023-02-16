@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Core;
@@ -9,46 +10,43 @@ namespace Controllers
 {
     public class RespawnController : MonoBehaviour
     {
-        [SerializeField] private List<RespawnFloor> floors;
+        [SerializeField] private List<RespawnUnit> respawnUnits;
 
-        public void ResetFloor(FloorType type)
+        private void ResetAll()
         {
-            foreach (var floor in floors.Where(floor => floor.floorType == type))
-            {
-                foreach (var respawnUnit in floor.respawnUnits)
-                {
-                    respawnUnit.unit.GetComponent<ISpawnAble>().Spawn(respawnUnit.respawnPosition);
-                }
+            StartCoroutine(WaitAndResetAll(3));
+        }
+
+        private IEnumerator WaitAndResetAll(float delay)
+        {
+            yield return new WaitForSeconds(delay);
+            foreach (var respawnUnit in respawnUnits) 
+            { 
+                respawnUnit.unit.GetComponent<ISpawnAble>().Spawn(respawnUnit.respawnPosition);
             }
         }
 
         private void Awake()
         {
+            Player.OnDeath += ResetAll;
+            
             // go through each game object and init their position for later respawn
-            foreach (var respawnUnit in floors.SelectMany(floor => floor.respawnUnits))
+            foreach (var respawnUnit in respawnUnits)
             {
                 respawnUnit.respawnPosition = respawnUnit.unit.transform.position;
             }
         }
     
-        // this has to be a class
         [Serializable]
-        public class RespawnFloor
+        public class RespawnUnit
         {
-            public FloorType floorType;
-            public List<RespawnUnit> respawnUnits;
+            public GameObject unit;
 
-            [Serializable]
-            public class RespawnUnit
+            public Vector2 respawnPosition;
+
+            public void Init(Vector2 pos)
             {
-                public GameObject unit;
-
-                public Vector2 respawnPosition;
-
-                public void Init(Vector2 pos)
-                {
-                    respawnPosition = pos;
-                }
+                respawnPosition = pos;
             }
         }
     }
