@@ -53,7 +53,6 @@ namespace DefaultNamespace
             var player = col.GetComponent<Player>();
             if (!player) return;
             direction = Direction(col.transform.position, transform.position);
-            print(direction);
             if(hostile)
                 player.TakeDamage(direction);
             else
