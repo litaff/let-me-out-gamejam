@@ -7,7 +7,7 @@ using UnityEngine;
 public class TeleporterPad : MonoBehaviour
 {
     [SerializeField] private TeleporterPad linkedPad;
-    [SerializeField] private float teleportOffset;
+    [SerializeField] private float teleportOffset = 1.5f;
     private List<Character> characters;
 
     private void Awake()
