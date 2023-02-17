@@ -1,11 +1,12 @@
 ﻿using System;
 using Activators;
+using Core;
 using UnityEngine;
 
 namespace DefaultNamespace
 {
     [RequireComponent(typeof(Controller2D))]
-    public class SimpleObject : MonoBehaviour, IActivator
+    public class SimpleObject : MonoBehaviour, IActivator, ISpawnAble
     {
         [SerializeField] private float moveSpeed = 6f;
         [SerializeField] private bool hostile;
@@ -72,6 +73,11 @@ namespace DefaultNamespace
         private Vector2 Direction(Vector2 a, Vector2 b)
         {
             return new Vector2(a.x - b.x, a.y - b.y).normalized;
+        }
+
+        public void Spawn(Vector2 pos)
+        {
+            transform.position = pos;
         }
     }
 }
