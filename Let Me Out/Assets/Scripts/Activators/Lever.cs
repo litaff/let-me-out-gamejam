@@ -16,9 +16,16 @@ namespace Activators
 
         [SerializeField] private bool singleUse = false;
         [SerializeField] private int id;
+        [SerializeField] private Sprite offSprite;
+        [SerializeField] private Sprite onSprite;
+
+        private SpriteRenderer spriteRenderer;
+        private AudioSource audioSource;
 
         private void Awake()
         {
+            audioSource = GetComponent<AudioSource>();
+            spriteRenderer = GetComponentInChildren<SpriteRenderer>();
             GetComponent<CircleCollider2D>().isTrigger = true;
             Active = false;
         }
@@ -34,11 +41,15 @@ namespace Activators
             if (Active)
             {
                 Deactivate?.Invoke(id);
+                audioSource.Play();
+                spriteRenderer.sprite = offSprite;
                 Active = false;
                 return;
             }
         
             Activate?.Invoke(id);
+            audioSource.Play();
+            spriteRenderer.sprite = onSprite;
             Active = true;
         }
     }

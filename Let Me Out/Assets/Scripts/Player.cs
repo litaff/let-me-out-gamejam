@@ -1,18 +1,33 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using Activators;
-using Core;
+using Controllers;
 using UnityEngine;
 
 public class Player : Character, ISpawnAble, IActivator
 {
 	[SerializeField] private int maxHitPoints;
 	[SerializeField] private float maxInvulnerabilityTime;
-	private int hitPoints;
+	[SerializeField] private AudioClip damage;
+	[SerializeField] private AudioClip death;
+	[SerializeField] private GameObject health;
+	private int hp;
+	private bool endGame;
 	private float invulnerabilityTime;
 	private Vector2 input;
+	private AudioSource audioSource;
+	private SpriteRenderer spriteRenderer;
+	private ParticleSystem particles;
 
+	private int HitPoints
+	{
+		get => hp;
+		set
+		{
+			hp = value;
+			UpdateHealth();
+		}
+	}
+	
 	public static event Action<Vector2> OnDamage;
 	public static event Action OnDeath;
 
@@ -20,8 +35,18 @@ public class Player : Character, ISpawnAble, IActivator
 	{
 		transform.position = pos;
 		
-		hitPoints = maxHitPoints;
+		HitPoints = maxHitPoints;
 		invulnerabilityTime = 0;
+	}
+
+	public void Heal()
+	{
+		if (HitPoints >= maxHitPoints)
+		{
+			HitPoints = maxHitPoints;
+			return;
+		}
+		HitPoints++;
 	}
 	
 	// always 1 hit point
@@ -29,13 +54,19 @@ public class Player : Character, ISpawnAble, IActivator
 	{
 		if (invulnerabilityTime > 0) return;
 
-		hitPoints--;
+		HitPoints--;
 		invulnerabilityTime = maxInvulnerabilityTime;
 		velocity = direction*30;
 		
 		OnDamage?.Invoke(transform.position);
+		particles.Play();
 		
-		if (hitPoints > 0) return;
+		if (HitPoints > 0)
+		{
+			audioSource.clip = damage;
+			audioSource.Play();
+			return;
+		}
 		
 		Die();
 	}
@@ -43,26 +74,55 @@ public class Player : Character, ISpawnAble, IActivator
 	protected override void Start()
 	{
 		base.Start();
+
+		PointController.OnAllPickUp += Victory;
 		
 		input = Vector2.zero;
-		
+		endGame = false;
+
+		particles = GetComponentInChildren<ParticleSystem>();
+		spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+		audioSource = GetComponent<AudioSource>();
+
 		Spawn(transform.position);
 	}
 
+	private void UpdateHealth()
+	{
+		var percent = (float) HitPoints / maxHitPoints;
+		print(percent);
+		health.transform.localScale = new Vector2(percent, health.transform.localScale.y);
+	}
+	
 	private void Update()
 	{
-		if (hitPoints <= 0) return;
+		if(endGame) return;
+		
+		if (HitPoints <= 0) return;
 		// ^ stops all movement for this character isolate movement and move this there is needed
 
 		if(invulnerabilityTime > 0)
 			invulnerabilityTime -= Time.deltaTime;
-		
+
+		if (input.x > 0)
+			spriteRenderer.flipX = false;
+		if (input.x < 0)
+			spriteRenderer.flipX = true;
+		// else do keep state
+
 		MoveWithInput();
 	}
 
+	private void Victory()
+	{
+		endGame = true;
+	}
+	
 	private void Die()
 	{
 		OnDeath?.Invoke();
+		audioSource.clip = death;
+		audioSource.Play();
 	}
 
 	private bool Stunned()

@@ -1,5 +1,3 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -9,9 +7,11 @@ public class TeleporterPad : MonoBehaviour
     [SerializeField] private TeleporterPad linkedPad;
     [SerializeField] private float teleportOffset = 1.5f;
     private List<Character> characters;
+    private AudioSource audioSource;
 
     private void Awake()
     {
+        audioSource = GetComponent<AudioSource>();
         characters = new List<Character>();
         GetComponent<CircleCollider2D>().isTrigger = true; // to make sure it's a trigger
     }
@@ -39,5 +39,6 @@ public class TeleporterPad : MonoBehaviour
         characters.Add(character);
         var position = transform.position;
         character.transform.position = new Vector2(position.x, position.y + teleportOffset);
+        audioSource.Play();
     }
 }

@@ -1,8 +1,6 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using Activators;
-using TreeEditor;
 using UnityEngine;
 
 public class AutomaticDoor : MonoBehaviour
@@ -17,11 +15,14 @@ public class AutomaticDoor : MonoBehaviour
     private Vector2 startPos;
     private Vector2 startLerp;
     private Vector2 endLerp;
+    private AudioSource audioSource;
 
     private void Awake()
     {
         isMoving = false;
         startPos = transform.position;
+
+        audioSource = GetComponent<AudioSource>();
         
         switch (activatorType)
         {
@@ -62,6 +63,8 @@ public class AutomaticDoor : MonoBehaviour
 
         var progress = ((Vector2) transform.position - endLerp).magnitude / positionDelta.magnitude;
         time = doActionFor - doActionFor * progress;
+        
+        audioSource.Play();
     }
     
     private void Update()

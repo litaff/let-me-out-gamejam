@@ -14,11 +14,17 @@ namespace Activators
         public static event Action<int> Deactivate;
     
         [SerializeField] protected int id;
+        [SerializeField] private Sprite offSprite;
+        [SerializeField] private Sprite onSprite;
 
+        private SpriteRenderer spriteRenderer;
+        private AudioSource audioSource;
         private List<IActivator> activators;
 
         private void Awake()
         {
+            audioSource = GetComponent<AudioSource>();
+            spriteRenderer = GetComponentInChildren<SpriteRenderer>();
             activators = new List<IActivator>();
             GetComponent<BoxCollider2D>().isTrigger = true;
         }
@@ -30,7 +36,10 @@ namespace Activators
             if(activator is null) return;
 
             activators.Add(activator);
+            
             Activate?.Invoke(id);
+            audioSource.Play();
+            spriteRenderer.sprite = onSprite;
         }
 
         private void OnTriggerExit2D(Collider2D other)
@@ -40,8 +49,12 @@ namespace Activators
             if(activator is null) return;
 
             activators.Remove(activator);
-            if(activators.Count == 0)
-                Deactivate?.Invoke(id);
+            
+            if (activators.Count != 0) return;
+            
+            Deactivate?.Invoke(id);
+            audioSource.Play();
+            spriteRenderer.sprite = offSprite;
         }
     }
 }
